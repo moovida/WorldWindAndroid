@@ -5,18 +5,22 @@
 
 package gov.nasa.worldwindx;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected static final int PRINT_METRICS_DELAY = 3000;
 
     protected static final Date sessionTimestamp = new Date();
+    private static final int REQUEST_PERMISSION = 666;
 
     protected static int selectedItemId = R.id.nav_basic_globe_activity;
 
@@ -87,6 +92,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         onCreateDrawer();
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        REQUEST_PERMISSION);
+
+        }
+
         if (findViewById(R.id.code_container) != null) {
             // The code container view will be present only in the
             // large-screen layouts (res/values-w900dp).
@@ -120,7 +135,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             //
             // http://developer.android.com/guide/components/fragments.html
             //
-            loadTutorial(BasicGlobeFragment.class, "file:///android_asset/basic_globe_tutorial.html", R.string.title_basic_globe);
+            loadTutorial(GeoPackageFragment.class, "file:///android_asset/basic_globe_tutorial.html", R.string.title_basic_globe);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
         }
     }
 
