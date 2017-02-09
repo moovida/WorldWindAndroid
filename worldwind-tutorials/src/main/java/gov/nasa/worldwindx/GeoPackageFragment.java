@@ -36,7 +36,7 @@ public class GeoPackageFragment extends BasicGlobeFragment {
 
         // Create a layer factory, World Wind's general component for creating layers
         // from complex data sources.
-//        LayerFactory layerFactory = new LayerFactory();
+        LayerFactory layerFactory = new LayerFactory();
 //
 //        // Create an OGC GeoPackage layer to display a high resolution monochromatic image of Naval Air Station Oceana
 //        // in Virginia Beach, VA.
@@ -62,7 +62,7 @@ public class GeoPackageFragment extends BasicGlobeFragment {
 //            }
 //        );
 
-        String mapsforgePath = "/storage/emulated/0/italy.map";
+        String mapsforgePath = "/storage/emulated/0/mymaps/italy.map";
 
         MapsforgeFactory mapsforgeFactory = new MapsforgeFactory();
         mapsforgeFactory.createFromMapsforge(
@@ -75,9 +75,9 @@ public class GeoPackageFragment extends BasicGlobeFragment {
 
 
                         // Place the viewer directly over the GeoPackage image.
-                        getWorldWindow().getNavigator().setLatitude(46.0);
-                        getWorldWindow().getNavigator().setLongitude(11.0);
-                        getWorldWindow().getNavigator().setAltitude(20e3);
+                        getWorldWindow().getNavigator().setLatitude(45.6078);
+                        getWorldWindow().getNavigator().setLongitude(10.6705);
+                        getWorldWindow().getNavigator().setAltitude(70e3);
                         Log.i("gov.nasa.worldwind", "Mapsforge layer creation succeeded");
                     }
 

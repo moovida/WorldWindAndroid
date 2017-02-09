@@ -105,18 +105,19 @@ public class MapsforgeFactory {
     protected void createFromMapsforgeAsync(String pathName, Layer layer, MapsforgeFactory.Callback callback) {
 
         File[] files = new File[]{new File(pathName)};
-        Mapsforge mapsforge = new Mapsforge(InternalRenderTheme.OSMARENDER.name(), 3, 21, 256, files, null, MultiMapDataStore.DataPolicy.RETURN_ALL);
+        int tileSizePixels = 512;
+        Mapsforge mapsforge = new Mapsforge(tileSizePixels, files, null, MultiMapDataStore.DataPolicy.RETURN_ALL);
         BoundingBox bbox = mapsforge.getBoundingBox();
 
         final RenderableLayer mapsforgeRenderables = new RenderableLayer();
 
         LevelSetConfig config = new LevelSetConfig();
-        config.sector.set(bbox.minLatitude, bbox.minLongitude,
-                bbox.maxLatitude  - bbox.minLatitude, bbox.maxLongitude - bbox.minLongitude);
-        config.firstLevelDelta = 180;
-        config.numLevels = 21; // zero when there are no zoom levels, (0 = -1 + 1)
-        config.tileWidth = 256;
-        config.tileHeight = 256;
+//        config.sector.set(bbox.minLatitude, bbox.minLongitude,
+//                bbox.maxLatitude  - bbox.minLatitude, bbox.maxLongitude - bbox.minLongitude);
+        config.firstLevelDelta = 36;
+        config.numLevels = 22; // zero when there are no zoom levels, (0 = -1 + 1)
+        config.tileWidth = tileSizePixels;
+        config.tileHeight = tileSizePixels;
 
         TiledSurfaceImage surfaceImage = new TiledSurfaceImage();
         surfaceImage.setLevelSet(new LevelSet(config));

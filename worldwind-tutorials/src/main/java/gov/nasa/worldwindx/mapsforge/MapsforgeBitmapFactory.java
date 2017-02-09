@@ -37,7 +37,7 @@ public class MapsforgeBitmapFactory implements ImageSource.BitmapFactory {
 
     @Override
     public Bitmap createBitmap() {
-        Bitmap bitmap = mapsforge.renderTile(tileColumn, tileRow, zoomLevel, 256);
+        Bitmap bitmap = mapsforge.renderTile(tileColumn, tileRow, zoomLevel);
         return bitmap;
     }
 }

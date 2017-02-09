@@ -31,18 +31,17 @@ import java.io.File;
  */
 public class Mapsforge {
     // Reasonable defaults ..
-    public static int MIN_ZOOM = 3;
-    public static int MAX_ZOOM = 20;
-    public static final int TILE_SIZE_PIXELS = 256;
     private final DisplayModel model = new DisplayModel();
     private final float scale = DisplayModel.getDefaultUserScaleFactor();
     private RenderThemeFuture theme = null;
     private XmlRenderTheme mXmlRenderTheme = null;
     private DatabaseRenderer renderer;
 
+    private int tileSizePixels;
     private MultiMapDataStore mapDatabase;
 
-    public Mapsforge(String cacheTileSourceName, int minZoom, int maxZoom, int tileSizePixels, File[] file, XmlRenderTheme xmlRenderTheme, MultiMapDataStore.DataPolicy dataPolicy) {
+    public Mapsforge(int tileSizePixels, File[] file, XmlRenderTheme xmlRenderTheme, MultiMapDataStore.DataPolicy dataPolicy) {
+        this.tileSizePixels = tileSizePixels;
         mapDatabase = new MultiMapDataStore(dataPolicy);
         for (int i = 0; i < file.length; i++)
             mapDatabase.addMapDataStore(new MapFile(file[i]), false, false);
@@ -56,8 +55,8 @@ public class Mapsforge {
         renderer = new DatabaseRenderer(mapDatabase, AndroidGraphicFactory.INSTANCE, tileCache,
                 new TileBasedLabelStore(tileCache.getCapacityFirstLevel()), true, true);
 
-        minZoom = MIN_ZOOM;
-        maxZoom = renderer.getZoomLevelMax();
+        int minZoom = 0;
+        int maxZoom = renderer.getZoomLevelMax();
 
         Log.d("MAPSFORGE", "min=" + minZoom + " max=" + maxZoom + " tilesize=" + tileSizePixels);
 
@@ -71,36 +70,42 @@ public class Mapsforge {
         }
     }
 
+    public int getTileSizePixels() {
+        return tileSizePixels;
+    }
 
     //The synchronized here is VERY important.  If missing, the mapDatabase read gets corrupted by multiple threads reading the file at once.
-    public synchronized Bitmap renderTile(int x, int y, int zoom, int tileSize) {
-
-        Tile tile = new Tile(x, y, (byte) zoom, tileSize);
-        model.setFixedTileSize(tileSize);
-
-        //You could try something like this to load a custom theme
-        //try{
-        //	jobTheme = new ExternalRenderTheme(themeFile);
-        //}
-        //catch(Exception e){
-        //	jobTheme = InternalRenderTheme.OSMARENDER;
-        //}
-
-
-        if (mapDatabase == null)
-            return null;
+    public synchronized Bitmap renderTile(int x, int y, int zoom) {
         try {
+            Tile tile = new Tile(x, y, (byte) zoom, tileSizePixels);
+            model.setFixedTileSize(tileSizePixels);
+
+            //You could try something like this to load a custom theme
+            //try{
+            //	jobTheme = new ExternalRenderTheme(themeFile);
+            //}
+            //catch(Exception e){
+            //	jobTheme = InternalRenderTheme.OSMARENDER;
+            //}
+
+
+            if (mapDatabase == null)
+                return null;
+
             //Draw the tile
-            RendererJob mapGeneratorJob = new RendererJob(tile, mapDatabase, theme, model, scale, false, false);
+            RendererJob mapGeneratorJob = new RendererJob(tile, mapDatabase, theme, model, scale, true, false);
             AndroidTileBitmap bmp = (AndroidTileBitmap) renderer.executeJob(mapGeneratorJob);
-            if (bmp != null)
-                return AndroidGraphicFactory.getBitmap(bmp);
+            if (bmp != null){
+
+                Bitmap bitmap = AndroidGraphicFactory.getBitmap(bmp);
+                return bitmap;
+            }
         } catch (Exception ex) {
             Log.d("MAPSFORGE", "###################### Mapsforge tile generation failed", ex);
         }
         //Make the bad tile easy to spot
-        Bitmap bitmap = Bitmap.createBitmap(TILE_SIZE_PIXELS, TILE_SIZE_PIXELS, Bitmap.Config.RGB_565);
-        bitmap.eraseColor(Color.YELLOW);
+        Bitmap bitmap = Bitmap.createBitmap(tileSizePixels, tileSizePixels, Bitmap.Config.RGB_565);
+        bitmap.eraseColor(Color.GREEN);
         return bitmap;
     }
 
